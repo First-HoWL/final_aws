@@ -21,7 +21,10 @@ from app import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/tags', views.get_tags),
-    path('api/notes', views.get_notes),
+    path('api/notes/', views.get_notes),
+    path('api/note/random/', views.get_note_random),
+    path('api/note/<int:pk>/', views.get_note_by_id),
+    path('api/notes/<int:pk>/', views.get_notes_writed_by_me),
     path('api/account/create', views.create_account),
     path('api/account/login', views.login_account),
 ]

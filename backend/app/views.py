@@ -10,6 +10,8 @@ from .serializers import *
 from django.contrib.auth.hashers import make_password, check_password
 
 
+import random
+
 @api_view(['GET']) 
 def get_tags(request):
     if request.method == "GET":
@@ -29,6 +31,29 @@ def get_notes(request):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET', 'POST']) 
+def get_note_by_id(request, pk):
+    if request.method == "GET":
+        notes = Note.objects.filter(id=pk)
+        serialized = NoteSerializer(notes, many=True).data
+        return Response(serialized)
+
+@api_view(['GET', 'POST']) 
+def get_note_random(request):
+    if request.method == "GET":
+        pk = random.randint(1, Note.objects.count())
+        notes = Note.objects.filter(id=pk)
+        serialized = NoteSerializer(notes, many=True).data
+        return Response(serialized)
+
+@api_view(['GET']) 
+def get_notes_writed_by_me(request, pk):
+    if request.method == "GET":
+        notes = Note.objects.filter(account = pk)
+        serialized = NoteSerializer(notes, many=True).data
+        return Response(serialized)
+    
 
 @api_view(['POST'])
 def create_account(request):
