@@ -91,6 +91,8 @@ WSGI_APPLICATION = 'noted.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+# $env:USE_SQLITE="True"
+
 USE_SQLITE = os.getenv("USE_SQLITE", "False") == "True"
 
 if USE_SQLITE:
