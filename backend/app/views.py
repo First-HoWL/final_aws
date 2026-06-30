@@ -14,10 +14,8 @@ from .serializers import *
 def get_tags(request):
     if request.method == "GET":
         tags = Tag.objects.all()
-        serrialized_tags = []
-        for tag in tags:
-            serrialized_tags.append(TagSerializer(tag))
-        return Response(serrialized_tags)
+        serialized = TagSerializer(tags, many=True).data
+        return Response(serialized)
 
 @api_view(['GET', 'POST']) 
 def get_notes(request):
