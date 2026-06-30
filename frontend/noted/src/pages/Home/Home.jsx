@@ -7,26 +7,35 @@ import './Home.css';
 
 export default function Home() {
     const [confessions, setConfessions] = useState([]);
-    const [activeTag, setActiveTag]     = useState(null);
+    const [activeTags, setActiveTags]   = useState([]); // Массив для мультивыбора тегов
     const [sort, setSort]               = useState('new');
     const [loading, setLoading]         = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
         setLoading(true);
-        getConfessions({ tag: activeTag, sort }).then(data => {
-        setConfessions(data);
-        setLoading(false);
+        // Отправляем массив выбранных тегов на фильтрацию
+        getConfessions({ tags: activeTags, sort }).then(data => {
+            setConfessions(Array.isArray(data) ? data : []);
+            setLoading(false);
+        })
+        .catch(err => {
+            console.error("Критическая ошибка при запросе к Django:", err);
+            setConfessions([]); 
+            setLoading(false);
         });
-    }, [activeTag, sort]);
+    }, [activeTags, sort]);
 
     const handleRandom = async () => {
         const confession = await getRandomConfession();
         if (confession) navigate(`/confession/${confession.id}`);
     };
 
+    // Добавление или удаление тега из списка активных фильтров
     const toggleTag = (tag) => {
-        setActiveTag(prev => prev === tag ? null : tag);
+        setActiveTags(prev => 
+            prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+        );
     };
 
     return (
@@ -53,7 +62,7 @@ export default function Home() {
                             key={tag}
                             tag={tag}
                             onClick={() => toggleTag(tag)}
-                            active={activeTag === tag}
+                            active={activeTags.includes(tag)} // Подсветка, если тег выбран
                         />
                         ))}
                     </div>
@@ -80,8 +89,8 @@ export default function Home() {
                     ) : confessions.length === 0 ? (
                         <div className="home__empty">
                             <p>Нічого не знайдено</p>
-                            <button className="btn btn-ghost" onClick={() => setActiveTag(null)}>
-                                Скинути фільтр
+                            <button className="btn btn-ghost" onClick={() => setActiveTags([])}>
+                                Скинути фільтри
                             </button>
                         </div>
                     ) : (

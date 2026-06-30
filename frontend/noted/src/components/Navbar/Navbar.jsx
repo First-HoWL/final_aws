@@ -12,9 +12,9 @@ export default function Navbar() {
         <header className="navbar">
             <div className="container navbar__inner">
                 <Link to="/" className="navbar__logo">
-                    <span className="navbar__logo-mark">N</span>
-                    <span className="navbar__logo-text">oted</span>
+                    Noted
                 </Link>
+
                 
                 <nav className="navbar__nav">
                     <NavLink 

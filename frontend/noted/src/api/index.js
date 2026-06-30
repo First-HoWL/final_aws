@@ -2,16 +2,32 @@
 
 import axios from 'axios'
 
-const BASE_URL = import.meta.env.VITE_API_URL || "https://localhost:8000/api"
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
 const api = axios.create({
     baseURL: BASE_URL,
-    withCredentials: true,
-})
+    timeout: 5000,
+    withCredentials: false
+});
 
-export const MOCK_TAGS = [
-    'любовь', 'работа', 'страхи', 'семья', 'стыд', 'мечты', 'радость', 'учеба', 'детство', 'прочее'
-]
+export async function getTags() {
+    return api.get('/tags').then(r => r.data);
+}
+
+export const TAG_MAP = {
+    1: 'любовь',
+    2: 'работа',
+    3: 'страхи',
+    4: 'семья',
+    5: 'стыд',
+    6: 'мечты',
+    7: 'радость',
+    8: 'учеба',
+    9: 'детство',
+    10: 'прочее'
+};
+
+export const MOCK_TAGS = Object.values(TAG_MAP);
 
 export const MOCK_CONFESSIONS = [
     {
@@ -52,60 +68,146 @@ export const MOCK_CONFESSIONS = [
     },
 ];
 
-export async function getConfessions({tag, sort} = {}) {
-    // TODO: return api.get('/confessions', { params: { tag, sort } }).then(r => r.data);
-    let list = [...MOCK_CONFESSIONS];
-    if (tag) list = list.filter(c => c.tags.includes(tag));
-    if (sort === "popular") list.sort((a,b) => b.likes - a.likes);
-    return list;
+export async function getConfessions({ tags, sort } = {}) {
+    return api.get('/api/notes/').then(r => {
+        let list = r.data;
+
+        list = list.map(item => formatConfession(item));
+
+        if (tags && tags.length > 0) {
+            list = list.filter(c => c.tags.some(t => tags.includes(t)));
+        }
+
+        if (sort === "popular") {
+            list.sort((a, b) => b.likes - a.likes);
+        } else {
+            list.sort((a, b) => b.id - a.id);
+        }
+
+        return list;
+    });
+}
+
+function formatConfession(item) {
+    if (!item) return null;
+    const stringTags = Array.isArray(item.tags) 
+        ? item.tags.map(tagId => TAG_MAP[tagId] || 'прочее')
+        : [];
+        
+    return {
+        id: item.id,
+        text: item.text,
+        title: item.title,
+        tags: stringTags,
+        likes: item.likes || 0,
+        views: item.views || 0,
+        status: item.status ? item.status.toLowerCase() : 'published',
+        created_at: item.date
+    };
 }
 
 export async function getConfession(id) {
-    // TODO: return api.get(`/confessions/${id}`).then(r => r.data);
-    return MOCK_CONFESSIONS.find(c => c.id === id) || null;
+    return api.get(`/api/note/${id}/`).then(r => {
+        const data = Array.isArray(r.data) ? r.data[0] : r.data;
+        return formatConfession(data);
+    });
 }
 
 export async function getRandomConfession() {
-    // TODO: return api.get('/confessions/random').then(r => r.data);
-    return MOCK_CONFESSIONS[Math.floor(Math.random() * MOCK_CONFESSIONS.length)];
+    return api.get('/api/note/random/').then(r => {
+        const data = Array.isArray(r.data) ? r.data[0] : r.data;
+        return formatConfession(data);
+    });
 }
 
-export async function submitConfession({ text, tags }) {
-    // TODO: return api.post('/confessions', { text, tags }).then(r => r.data);
-    return { id: 'new-' + Date.now(), status: 'pending', text, tags };
+export async function submitConfession({ title, text, tags }) {
+    const tagIds = tags.map(tagName => {
+        const id = Object.keys(TAG_MAP).find(key => TAG_MAP[key] === tagName);
+        return Number(id || 10);
+    });
+
+    const payload = {
+        title: title,
+        text: text,
+        isAnonimuous: true,
+        likes: 0,
+        views: 0,
+        tags: tagIds,
+        status: "PUBLISHED"
+    };
+
+    return api.post('/api/notes/', payload).then(r => r.data);
 }
 
 export async function likeConfession(id) {
     // TODO: return api.post(`/confessions/${id}/like`).then(r => r.data);
-    return {likes: 999};
+    console.log(`Лайк для записи ${id} отправится на сервер в будущем`)
+    return { likes: 999 };
 }
 
 export async function sendFeedback({ confession_id, text }) {
     // TODO: return api.post('/feedback', { confession_id, text }).then(r => r.data);
+    console.log(`Фидбек для записи ${confession_id}: ${text}`);
     return { ok: true };
 }
 
 export async function loginUser({ username, password }) {
     // TODO: return api.post('/auth/login', { username, password }).then(r => r.data);
-    return { token: "mock-token", user: { id: 1, username } };
+    return api.post('/account/login', { 
+        login: username,
+        password: password 
+    }).then(r => {
+        if (r.data.success) {
+            localStorage.setItem('user_id', r.data.accaunt.id);
+        }
+        return {
+            token: "django-session",
+            user: { 
+                id: r.data.accaunt.id, 
+                username: r.data.accaunt.login,
+                name: r.data.accaunt.name 
+            }
+        };
+    });
 }
 
 export async function registerUser({ username, password, email }) {
     // TODO: return api.post('/auth/register', { username, password, email }).then(r => r.data);
-    return { token: "mock-token", user: { id: 1, username } };
+    return api.post('/account/create', {
+        login: username,
+        password: password,
+        name: username
+    }).then(r => {
+        if (r.data.success) {
+            localStorage.setItem('user_id', r.data.account.id);
+        }
+        return {
+            token: "django-session",
+            user: { 
+                id: r.data.account.id, 
+                username: r.data.account.login,
+                name: r.data.account.name 
+            }
+        };
+    });
 }
 
 export async function logoutUser() {
     // TODO: return api.post('/auth/logout').then(r => r.data);
+    localStorage.removeItem('user_id');
     return { ok: true };
 }
 
 export async function getMe() {
+    // /api/notes/<int:pk>/    -- get posts that were written by user
     // TODO: return api.get('/auth/me').then(r => r.data);
-    return null;
-}
-
-export async function getDonateStats() {
-    // TODO: return api.get('/support/stats').then(r => r.data);
-    return { total: 4280, supporters: 37 };
+    const userId = localStorage.getItem('user_id');
+    if (!userId) return null;
+    
+    return api.get(`/notes/${userId}/`).then(r => {
+        return {
+            id: userId,
+            written_notes: r.data
+        };
+    }).catch(() => null);
 }

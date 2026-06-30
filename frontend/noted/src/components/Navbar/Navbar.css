@@ -17,24 +17,28 @@
   height: 100%;
 }
 
+/* === ОБНОВЛЕННЫЙ СТИЛЬНЫЙ ЛОГОТИП === */
 .navbar__logo {
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: var(--text-xl);
-  letter-spacing: -0.03em;
+  font-size: 1.6rem;
+  font-weight: 800; /* Делаем шрифт жирным и плотным */
+  letter-spacing: -0.8px; /* Слегка сдвигаем буквы друг к другу, чтобы убрать дыры */
+  text-decoration: none;
+  
+  /* Эффект градиентного текста под стиль ваших фиолетовых кнопок */
+  background: linear-gradient(135deg, #a855f7, #6366f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  
+  transition: opacity var(--transition);
+  height: auto;
+  display: inline-block;
 }
 
-.navbar__logo-mark {
-  color: var(--color-primary);
-  font-size: var(--text-2xl);
+.navbar__logo:hover {
+  opacity: 0.85;
 }
 
-.navbar__logo-text {
-  color: var(--color-text);
-}
+/* Старые стили марок и текста удалили, так как они больше не нужны */
 
 .navbar__nav {
   display: flex;

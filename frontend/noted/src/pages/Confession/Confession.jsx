@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getConfession, getRandomConfession, likeConfession, sendFeedback } from '../../api/index';
+import { getConfession, getRandomConfession, likeConfession } from '../../api/index';
 import TagBadge from '../../components/TagBadge/TagBadge';
 import './Confession.css';
 
@@ -15,14 +15,16 @@ export default function Confession() {
     const [loading, setLoading] = useState(true);
     const [liked, setLiked] = useState(false);
     const [likesCount, setLikesCount] = useState(0);
-    const [feedbackText, setFeedbackText] = useState('');
-    const [feedbackSent, setFeedbackSent] = useState(false);
     
     useEffect(() => {
         setLoading(true);
         getConfession(id).then(data => {
-            setConfession(data);
-            setLikesCount(data?.likes ?? 0);
+            const cleanData = Array.isArray(data) ? data : data;
+            setConfession(cleanData);
+            setLikesCount(cleanData?.likes ?? 0);
+            setLoading(false);
+        }).catch(err => {
+            console.error("Помилка завантаження зізнання:", err);
             setLoading(false);
         });
     }, [id]);
@@ -30,30 +32,24 @@ export default function Confession() {
     const handleLike = async () => {
         if (liked) return;
         const result = await likeConfession(id);
-        setLikesCount(result.likes);
+        setLikesCount(result?.likes ?? (likesCount + 1));
         setLiked(true);
     };
     
     const handleRandom = async () => {
         const c = await getRandomConfession();
-        if (c) navigate(`/confession/${c.id}`);
-    };
-    
-    const handleFeedback = async (e) => {
-        e.preventDefault();
-        if (!feedbackText.trim()) return;
-        await sendFeedback({ confession_id: id, text: feedbackText });
-        setFeedbackSent(true);
-        setFeedbackText('');
+        const cleanRandom = Array.isArray(c) ? c : c;
+        if (cleanRandom) navigate(`/confession/${cleanRandom.id}`);
     };
 
     const translateStatus = (status) => {
+        if (!status) return 'На перевірці';
         const map = {
             'published': 'Опубліковано',
             'pending': 'На перевірці',
             'rejected': 'Відхилено'
         };
-        return map[status] || status;
+        return map[status.toLowerCase()] || status;
     };
     
     if (loading) {
@@ -72,9 +68,10 @@ export default function Confession() {
         );
     }
     
-    const date = new Date(confession.created_at).toLocaleDateString('uk-UA', {
-        day: 'numeric', month: 'long', year: 'numeric',
-    });
+    const dateSource = confession.created_at || confession.date;
+    const date = dateSource 
+        ? new Date(dateSource).toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' })
+        : 'Нещодавно';
     
     return (
         <div className="confession-page">
@@ -86,11 +83,16 @@ export default function Confession() {
         
                 <article className="confession-article">
                     <div className="confession-article__meta">
-                        <span className={`status-badge status-badge--${confession.status}`}>
+                        <span className={`status-badge status-badge--${confession.status ? confession.status.toLowerCase() : 'pending'}`}>
                             {translateStatus(confession.status)}
                         </span>
                         <span className="confession-article__date">{date}</span>
                     </div>
+
+                    {/* ВЫВОДИМ ЗАГОЛОВОК НА СТРАНИЦЕ */}
+                    <h1 className="confession-article__title-text">
+                        {confession.title || "Анонімне зізнання"}
+                    </h1>
             
                     <p className="confession-article__text">« {confession.text} »</p>
             
@@ -111,7 +113,7 @@ export default function Confession() {
             
                         <span className="confession-article__views">
                             <EyeIcon className="confession-page__icon-eye" />
-                            {confession.views} переглядів
+                            {confession.views || 0} переглядів
                         </span>
             
                         <button className="btn btn-ghost" onClick={handleRandom} style={{ marginLeft: 'auto' }}>
@@ -119,32 +121,6 @@ export default function Confession() {
                         </button>
                     </div>
                 </article>
-        
-                <section className="confession-feedback">
-                    <h2 className="confession-feedback__title">Анонімна відповідь</h2>
-                    <p className="confession-feedback__hint">Ніхто не знає, хто ти. Напиши щось автору.</p>
-            
-                    {feedbackSent ? (
-                        <div className="confession-feedback__success">Твій відгук надіслано!</div>
-                    ) : (
-                        <form className="confession-feedback__form" onSubmit={handleFeedback}>
-                            <textarea
-                                className="confession-feedback__input"
-                                placeholder="Твій відгук..."
-                                value={feedbackText}
-                                onChange={e => setFeedbackText(e.target.value)}
-                                rows={4}
-                                maxLength={500}
-                            />
-                            <div className="confession-feedback__footer">
-                                <span className="confession-feedback__count">{feedbackText.length}/500</span>
-                                <button type="submit" className="btn btn-primary" disabled={!feedbackText.trim()}>
-                                    Надіслати
-                                </button>
-                            </div>
-                        </form>
-                    )}
-                </section>
         
             </div>
         </div>

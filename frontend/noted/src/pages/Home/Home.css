@@ -79,8 +79,9 @@
 
 .home__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: var(--space-6, 24px); 
+    margin-top: var(--space-6);
 }
 
 .home__loading,
