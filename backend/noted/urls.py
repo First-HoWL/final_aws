@@ -22,4 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/tags', views.get_tags),
     path('api/notes', views.get_notes),
+    path('api/account/create', views.create_account),
+    path('api/account/login', views.login_account),
 ]

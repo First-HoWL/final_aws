@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework import viewsets
 from .models import *
 from .serializers import *
-
+from django.contrib.auth.hashers import make_password, check_password
 
 
 @api_view(['GET']) 
@@ -29,3 +29,105 @@ def get_notes(request):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def create_account(request):
+    data = request.data
+
+    required_fields = [
+        'login',
+        'password',
+        'name'
+    ]
+
+    for field in required_fields:
+        if field not in data:
+            return Response(
+                {"error": f"Field '{field}' is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    login = str(data['login']).strip()
+    password = str(data['password'])
+    name = str(data['name']).strip()
+
+    if len(login) < 3:
+        return Response(
+            {"error": "Login must contain at least 3 characters"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if len(password) < 6:
+        return Response(
+            {"error": "Password must contain at least 6 characters"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if Account.objects.filter(login=login).exists():
+        return Response(
+            {"error": "Login already exists"},
+            status=status.HTTP_409_CONFLICT
+        )
+
+    account = Account.objects.create(
+        login=login,
+        password=make_password(password),
+        name=name
+    )
+
+    return Response(
+        {
+            "success": True,
+            "account": {
+                "id": account.id,
+                "login": account.login,
+                "name": account.name
+            }
+        },
+        status=status.HTTP_201_CREATED
+    )
+
+@api_view(['POST'])
+def login_account(request):
+    data = request.data
+
+    required_fields = [
+        'login',
+        'password'
+    ]
+
+    for field in required_fields:
+        if field not in data:
+            return Response(
+                {"error": f"Field '{field}' is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    login = str(data['login']).strip()
+    password = str(data['password'])
+
+    try:
+        account = Account.objects.get(login=login)
+    except Account.DoesNotExist:
+        return Response(
+            {"error": "Invalid login or password"},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+    if not check_password(password, account.password):
+        return Response(
+            {"error": "Invalid login or password"},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+    return Response(
+        {
+            "success": True,
+            "accaunt": {
+                "id": account.id,
+                "login": account.login,
+                "name": account.name
+            }
+        },
+        status=status.HTTP_200_OK
+    )
