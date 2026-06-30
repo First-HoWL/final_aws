@@ -70,7 +70,7 @@ export async function getRandomConfession() {
     return MOCK_CONFESSIONS[Math.floor(Math.random() * MOCK_CONFESSIONS.length)];
 }
 
-export async function submitConfession({ test, tags }) {
+export async function submitConfession({ text, tags }) {
     // TODO: return api.post('/confessions', { text, tags }).then(r => r.data);
     return { id: 'new-' + Date.now(), status: 'pending', text, tags };
 }
