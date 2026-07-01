@@ -141,8 +141,8 @@ export async function submitConfession({ title, text, tags }) {
 
 export async function likeConfession(id) {
     // TODO: return api.post(`/confessions/${id}/like`).then(r => r.data);
-    console.log(`Лайк для записи ${id} отправится на сервер в будущем`)
-    return { likes: 999 };
+    console.log(`Лайк для записи ${id} отправится на сервер`);
+    return api.post(`/api/note/${id}/like/`).then(r => r.data);
 }
 
 export async function sendFeedback({ confession_id, text }) {

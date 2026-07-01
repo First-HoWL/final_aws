@@ -13,15 +13,25 @@ export default function ConfessionCard({ confession: { id, title, text, tags = [
         ? new Date(created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
         : 'Нещодавно';
 
-    const handleLike = (e) => {
-        e.preventDefault(); // Намертво блокирует переход по ссылке при клике на лайк
-        setIsLiked(!isLiked);
-        setLikesCount(prev => isLiked ? prev - 1 : prev + 1);
+    const handleLike = async (e) => {
+        e.preventDefault();
+        
+        if (isLiked) return;
+
+        try {
+            const result = await likeConfession(id);
+            
+            if (result && result.likes !== undefined) {
+                setLikesCount(result.likes);
+                setIsLiked(true);
+            }
+        } catch (err) {
+            console.error("Не вдалося зберегти лайк у базі Django:", err);
+        }
     };
 
     return (
         <Link to={`/confession/${id}`} className="card">
-            {/* Текст заменен на Заголовок, стили сохранены */}
             <p className="card__text card__text--bold-title">
                 {title || text || "Анонімне зізнання"}
             </p>

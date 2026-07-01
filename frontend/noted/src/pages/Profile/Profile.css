@@ -1,0 +1,130 @@
+.profile-page {
+  padding: var(--space-8) 0;
+  position: relative;
+  overflow: hidden;
+  min-height: calc(100vh - 72px);
+}
+
+.profile-page__container {
+  position: relative;
+  z-index: 2;
+}
+
+.profile-page__loading {
+  text-align: center;
+  padding: var(--space-9) 0;
+  color: var(--color-text-muted);
+}
+
+.profile-page__glow {
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  filter: blur(140px);
+  opacity: 0.1;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.profile-page__glow--purple {
+  top: 10%;
+  left: -5%;
+  background: var(--color-primary, #a855f7);
+}
+
+.profile-page__glow--blue {
+  bottom: 15%;
+  right: -5%;
+  background: #6366f1;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-7);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border-soft);
+}
+
+.profile-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-username {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.profile-role {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.profile-logout {
+  margin-left: auto;
+}
+
+.profile-tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  width: fit-content;
+  margin-bottom: var(--space-6);
+}
+
+.profile-tab {
+  padding: var(--space-2) var(--space-5);
+  border-radius: 4px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-muted);
+  transition: all var(--transition);
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.profile-tab:hover {
+  color: var(--color-text);
+}
+
+.profile-tab.active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.profile-content {
+  margin-top: var(--space-4);
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-6, 24px);
+}
+
+.profile-empty {
+  text-align: center;
+  padding: var(--space-9) 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}

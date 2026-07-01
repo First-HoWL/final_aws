@@ -31,9 +31,17 @@ export default function Confession() {
     
     const handleLike = async () => {
         if (liked) return;
-        const result = await likeConfession(id);
-        setLikesCount(result?.likes ?? (likesCount + 1));
-        setLiked(true);
+
+        try {
+            const result = await likeConfession(id);
+            
+            if (result && result.likes !== undefined) {
+                setLikesCount(result.likes);
+                setLiked(true);
+            }
+        } catch (err) {
+            console.error("Помилка при збереженні лайка на сторінці:", err);
+        }
     };
     
     const handleRandom = async () => {

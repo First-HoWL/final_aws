@@ -1,12 +1,11 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 
-// TODO: заменить на контекст/хук авторизации
-const MOCK_USER = null;
-
-export default function Navbar() {
+export default function Navbar({ user }) {
     const navigate = useNavigate();
-    const user = MOCK_USER;
+
+    const displayName = user?.username || user?.name || "";
+    const avatarLetter = displayName ? displayName[0].toUpperCase() : "U";
 
     return (
         <header className="navbar">
@@ -14,7 +13,6 @@ export default function Navbar() {
                 <Link to="/" className="navbar__logo">
                     Noted
                 </Link>
-
                 
                 <nav className="navbar__nav">
                     <NavLink 
@@ -24,7 +22,6 @@ export default function Navbar() {
                     >
                         Лента
                     </NavLink>
-                    
                     <NavLink 
                         to="/support" 
                         className={({isActive}) => isActive ? 'navbar__link active' : "navbar__link"} 
@@ -41,7 +38,7 @@ export default function Navbar() {
             
                     {user ? (
                         <NavLink to="/profile" className="navbar__avatar">
-                            {user.username[0].toUpperCase()}
+                            {avatarLetter}
                         </NavLink>
                     ) : (
                         <NavLink to="/login" className="btn btn-ghost">Войти</NavLink>
