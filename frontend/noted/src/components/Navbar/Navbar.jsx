@@ -4,7 +4,7 @@ import "./Navbar.css";
 export default function Navbar({ user }) {
     const navigate = useNavigate();
 
-    const displayName = user?.username || user?.name || "";
+    const displayName = user?.name || user?.username || "";
     const avatarLetter = displayName ? displayName[0].toUpperCase() : "U";
 
     return (

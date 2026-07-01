@@ -6,7 +6,7 @@ import './Profile.css';
 
 const MOCK_FAVOURITES = [];
 
-export default function Profile() {
+export default function Profile({ setUser: setGlobalUser }) {
   const [user, setUser]   = useState(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab]     = useState('my');
@@ -18,7 +18,7 @@ export default function Profile() {
       setLoading(false);
       if (!data) navigate('/login');
     }).catch(err => {
-      console.error("Ошибка при получении профиля:", err);
+      console.error("Помилка завантаження профілю:", err);
       setLoading(false);
       navigate('/login');
     });
@@ -26,6 +26,7 @@ export default function Profile() {
 
   const handleLogout = async () => {
     await logoutUser();
+    if (setGlobalUser) setGlobalUser(null);
     navigate('/');
   };
 
@@ -39,8 +40,9 @@ export default function Profile() {
   
   if (!user) return null;
 
-  const displayName = user.username || user.name || "Користувач";
-  const avatarLetter = displayName[0].toUpperCase();
+  const displayName = user.name || "Користувач";
+  const loginName = user.username || user.login || "";
+  const avatarLetter = displayName ? displayName[0].toUpperCase() : "U";
 
   const myNotes = Array.isArray(user.written_notes) ? user.written_notes : [];
   
@@ -57,7 +59,7 @@ export default function Profile() {
           <div className="profile-avatar">{avatarLetter}</div>
           <div>
             <h1 className="profile-username">{displayName}</h1>
-            <p className="profile-role">Учасник</p>
+            <p className="profile-role">Логін: @{loginName}</p>
           </div>
           <button className="btn btn-ghost profile-logout" onClick={handleLogout}>
             Вийти
@@ -66,12 +68,14 @@ export default function Profile() {
 
         <div className="profile-tabs">
           <button
+            type="button"
             className={`profile-tab ${tab === 'my' ? 'active' : ''}`}
             onClick={() => setTab('my')}
           >
             Мої записи ({myNotes.length})
           </button>
           <button
+            type="button"
             className={`profile-tab ${tab === 'favourites' ? 'active' : ''}`}
             onClick={() => setTab('favourites')}
           >
@@ -82,7 +86,11 @@ export default function Profile() {
         <div className="profile-content">
           {currentList.length === 0 ? (
             <div className="profile-empty">
-              <p>{tab === 'favourites' ? 'Немає збережених визнань.' : 'Ти ще нічого не писав.'}</p>
+              <p>
+                {tab === 'favourites' 
+                  ? 'Немає збережених визнань.' 
+                  : 'Ти ще нічого не писав.'}
+              </p>
             </div>
           ) : (
             <div className="profile-grid">

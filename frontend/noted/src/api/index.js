@@ -121,10 +121,10 @@ export async function getRandomConfession() {
 }
 
 export async function submitConfession({ title, text, tags }) {
-    const tagIds = tags.map(tagName => {
-        const id = Object.keys(TAG_MAP).find(key => TAG_MAP[key] === tagName);
-        return Number(id || 10);
-    });
+    const userId = localStorage.getItem('user_id');
+    
+    const selectedTagName = tags[0] || tags; 
+    const tagId = Object.keys(TAG_MAP).find(key => TAG_MAP[key] === selectedTagName) || 10;
 
     const payload = {
         title: title,
@@ -132,9 +132,14 @@ export async function submitConfession({ title, text, tags }) {
         isAnonimuous: true,
         likes: 0,
         views: 0,
-        tags: tagIds,
+        account_id: userId ? Number(userId) : null, 
+        account: userId ? Number(userId) : null,
+        name: "Anonymous",
+        tags: [Number(tagId)], 
         status: "PUBLISHED"
     };
+
+    console.log("Отправляем на бэкенд признание:", payload);
 
     return api.post('/api/notes/', payload).then(r => r.data);
 }
@@ -171,26 +176,27 @@ export async function loginUser({ username, password }) {
     });
 }
 
-export async function registerUser({ username, password, email }) {
-    // TODO: return api.post('/auth/register', { username, password, email }).then(r => r.data);
-    return api.post('/account/create', {
+export async function registerUser({ username, password, name }) {
+    return api.post('/api/account/create', {
         login: username,
         password: password,
-        name: username
+        name: name
     }).then(r => {
-        if (r.data.success) {
+        if (r.data && r.data.success) {
             localStorage.setItem('user_id', r.data.account.id);
         }
         return {
             token: "django-session",
             user: { 
                 id: r.data.account.id, 
-                username: r.data.account.login,
+                username: r.data.account.login, 
                 name: r.data.account.name 
             }
         };
     });
 }
+
+
 
 export async function logoutUser() {
     // TODO: return api.post('/auth/logout').then(r => r.data);

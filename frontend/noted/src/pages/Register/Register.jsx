@@ -2,9 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../../api/index';
 import '../Login/Login.css';
+import './Register.css';
 
-export default function Register() {
+export default function Register({ setUser }) {
   const [username, setUsername] = useState('');
+  const [name, setName]         = useState(''); // Новое поле для реального имени
   const [password, setPassword] = useState('');
   const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
@@ -18,14 +20,16 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
-    if (!username || !password) { setError('Заповни всі поля.'); return; }
+    if (!username || !password || !name) { setError('Заповни всі поля.'); return; }
     if (username.length < 3)    { setError('Логін повинен містити мінімум 3 символи.'); return; }
     if (password.length < 6)    { setError('Пароль повинен містити мінімум 6 символів.'); return; }
     
     setError('');
     setLoading(true);
     try {
-      await registerUser({ username, password });
+      // Передаем логин, пароль и имя строго в наш исправленный API
+      const res = await registerUser({ username, password, name });
+      setUser(res.user);
       navigate('/');
     } catch {
       setError('Помилка реєстрації. Логін вже зайнятий.');
@@ -59,6 +63,18 @@ export default function Register() {
                 placeholder="username" 
                 value={username} 
                 onChange={e => setUsername(e.target.value)} 
+              />
+            </div>
+
+            {/* НОВОЕ ИСПРАВЛЕННОЕ ПОЛЕ: ИМЯ */}
+            <div className="auth-field">
+              <label className="auth-field__label">Ім'я</label>
+              <input 
+                className="auth-field__input" 
+                type="text" 
+                placeholder="Ваше ім'я або нікнейм" 
+                value={name} 
+                onChange={e => setName(e.target.value)} 
               />
             </div>
 
