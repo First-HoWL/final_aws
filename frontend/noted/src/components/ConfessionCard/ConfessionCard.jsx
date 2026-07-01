@@ -4,6 +4,7 @@ import TagBadge from '../TagBadge/TagBadge';
 import './ConfessionCard.css';
 import { ReactComponent as HeartIcon } from '../../assets/images/heart-outline.svg';
 import { ReactComponent as EyeIcon } from '../../assets/images/eye.svg';
+import { likeConfession } from '../../api/index';
 
 export default function ConfessionCard({ confession: { id, title, text, tags = [], likes, views, created_at } }) {
     const [isLiked, setIsLiked] = useState(false);
