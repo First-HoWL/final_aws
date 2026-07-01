@@ -151,11 +151,12 @@ export async function sendFeedback({ confession_id, text }) {
     return { ok: true };
 }
 
-export async function loginUser({ username, password }) {
+export async function loginUser({ username, password, name = "name" }) {
     // TODO: return api.post('/auth/login', { username, password }).then(r => r.data);
     return api.post('/account/login', { 
         login: username,
-        password: password 
+        password: password,
+        name: name
     }).then(r => {
         if (r.data.success) {
             localStorage.setItem('user_id', r.data.accaunt.id);
