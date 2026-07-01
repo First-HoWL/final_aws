@@ -54,6 +54,16 @@ def get_notes_writed_by_me(request, pk):
         serialized = NoteSerializer(notes, many=True).data
         return Response(serialized)
     
+@api_view(['POST'])
+def like_note_api(request, pk):
+    try:
+        note = Note.objects.get(id=pk)
+        note.likes += 1
+        note.save()
+        
+        return Response({"success": True, "likes": note.likes}, status=status.HTTP_200_OK)
+    except Note.DoesNotExist:
+        return Response({"error": "Note not found"}, status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['POST'])
 def create_account(request):

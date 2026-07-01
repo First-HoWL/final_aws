@@ -25,6 +25,7 @@ urlpatterns = [
     path('api/note/random/', views.get_note_random),
     path('api/note/<int:pk>/', views.get_note_by_id),
     path('api/notes/<int:pk>/', views.get_notes_writed_by_me),
+    path('api/note/<int:pk>/like/', views.like_note_api), 
     path('api/account/create', views.create_account),
     path('api/account/login', views.login_account),
 ]
