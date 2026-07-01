@@ -2,7 +2,7 @@
 
 import axios from 'axios'
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://44.197.2.29:8000"
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000"
 
 const api = axios.create({
     baseURL: BASE_URL,
@@ -11,7 +11,7 @@ const api = axios.create({
 });
 
 export async function getTags() {
-    return api.get('/tags').then(r => r.data);
+    return api.get('/api/tags').then(r => r.data);
 }
 
 export const TAG_MAP = {
@@ -122,9 +122,15 @@ export async function getRandomConfession() {
 
 export async function submitConfession({ title, text, tags }) {
     const userId = localStorage.getItem('user_id');
-    
-    const selectedTagName = tags[0] || tags; 
-    const tagId = Object.keys(TAG_MAP).find(key => TAG_MAP[key] === selectedTagName) || 10;
+
+    if (!userId) {
+        throw new Error('NOT_AUTHENTICATED');
+    }
+
+    const tagIds = tags
+        .map(name => Object.keys(TAG_MAP).find(key => TAG_MAP[key] === name))
+        .filter(Boolean)
+        .map(Number);
 
     const payload = {
         title: title,
@@ -132,11 +138,8 @@ export async function submitConfession({ title, text, tags }) {
         isAnonimuous: true,
         likes: 0,
         views: 0,
-        account_id: userId ? Number(userId) : null, 
-        account: userId ? Number(userId) : null,
-        name: "Anonymous",
-        tags: [Number(tagId)], 
-        status: "PUBLISHED"
+        account_id: Number(userId),
+        tags: tagIds.length > 0 ? tagIds : [10],
     };
 
     console.log("Отправляем на бэкенд признание:", payload);
@@ -158,7 +161,7 @@ export async function sendFeedback({ confession_id, text }) {
 
 export async function loginUser({ username, password, name = "name" }) {
     // TODO: return api.post('/auth/login', { username, password }).then(r => r.data);
-    return api.post('/account/login', { 
+    return api.post('/api/account/login', { 
         login: username,
         password: password,
         name: name
@@ -211,7 +214,7 @@ export async function getMe() {
     const userId = localStorage.getItem('user_id');
     if (!userId) return null;
     
-    return api.get(`/notes/${userId}/`).then(r => {
+    return api.get(`/api/notes/${userId}/`).then(r => {
         return {
             id: userId,
             written_notes: r.data

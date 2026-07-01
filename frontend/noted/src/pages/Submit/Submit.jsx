@@ -47,7 +47,11 @@ export default function Submit() {
       await submitConfession({ title, text, tags: selectedTags });
       navigate('/pending');
     } catch (err) {
-      setError('Сталася помилка при відправці. Спробуй ще раз.');
+      if (err.message === 'NOT_AUTHENTICATED') {
+        setError('Щоб опублікувати визнання, спочатку увійди або зареєструйся.');
+      } else {
+        setError('Сталася помилка при відправці. Спробуй ще раз.');
+      }
     } finally {
       setLoading(false);
     }
